@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="{{ page.lang | default: site.lang | default: 'en' }}">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ page.title | default: site.title }}</title>
+  {% include head.html %}
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],    // 
+        displayMath: [['$$','$$'], ['\\[','\\]']]    // 
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">◆</div>
+        <div class="brand-text">
+          <span class="brand-title">{{ site.title }}</span>
+          <span class="brand-subtle">Understanding MoE via  Model Utilization Index (MUI)</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a href="#paper">Intro</a>
+        <a href="#findings">Findings</a>
+        <a href="#mui">MUI Metric</a>
+        <a href="#resources">Resources</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    {{ content }}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <strong>{{ site.title }}</strong> — © <span id="year"></span>
+      </div>
+      <div class="footer-right">
+        <a href="#paper">Top</a>
+        <a href="#resources">Resources</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Simple enhancements
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // smooth-scroll for in-page anchors
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const targetId = a.getAttribute('href').slice(1);
+        const target = document.getElementById(targetId);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+  <script>
+// modal
+(function(){
+  const modal=document.getElementById('img-modal'); if(!modal) return;
+  const modalImg=document.getElementById('img-modal-content'); const closeBtn=modal.querySelector('.modal-close');
+  document.addEventListener('click',(e)=>{if(e.target.classList&&e.target.classList.contains('zoomable')){
+    modal.style.display='block'; modalImg.src=e.target.src; modalImg.alt=e.target.alt||'';}});
+  const close=()=>{modal.style.display='none';}; closeBtn.addEventListener('click',close);
+  modal.addEventListener('click',(e)=>{if(e.target===modal) close();}); document.addEventListener('keydown',(e)=>{if(e.key==='Escape') close();});
+})();
+// chart
+(function(){
+  const el=document.getElementById('muiBar'); if(!el||typeof Chart==='undefined') return;
+  const labels=['Qwen1.5-MoE','DeepSeek-LV2','DeepSeek-Coder','GPT-OSS-20B']; const data=[8,12,15,28];
+  const base='rgba(16,163,127,0.55)', hover='rgba(16,163,127,0.85)', muted='rgba(153,153,153,0.35)'; let active=null;
+  const ctx=el.getContext('2d');
+  const chart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:labels.map(()=>base),borderRadius:10}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}},
+    onHover:(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default';},
+    onClick:(evt,els)=>{if(!els.length){active=null;} else {const idx=els[0].index; active=(active===idx)?null:idx;}
+      chart.data.datasets[0].backgroundColor=labels.map((_,i)=>active===null?base:(i===active?hover:muted)); chart.update();}}});
+})();
+</script>
+
+<script>
+(function(){
+  const el = document.getElementById('muiScatter');
+  if (!el || typeof Chart === 'undefined') return;
+
+  
+  let chart; // 
+  function loadImg(src){
+    const img = new Image();
+    img.onload = () => chart && chart.update('none'); // 
+    img.src = src;
+    return img;
+  }
+
+
+  const ICON_IMG = {
+    'DeepSeek-Light': loadImg('{{ "/assets/icons/deepseek.svg" | relative_url }}'),
+    'DeepSeek':       loadImg('{{ "/assets/icons/deepseek.svg" | relative_url }}'),
+    'Qwen':           loadImg('{{ "/assets/icons/qwen.svg"     | relative_url }}'),
+    'GPT-OSS':        loadImg('{{ "/assets/icons/openai.svg"   | relative_url }}'),
+  };
+
+ 
+  const rows = [
+    { x:44.8, y:29.3, label:'DeepSeek-V2-Light',        group:'DeepSeek-Light' },
+    { x:61.6, y:24.8, label:'DeepSeek-Coder-V2-Light',  group:'DeepSeek-Light' },
+
+    { x:67.3, y:43.4, label:'DeepSeek-V2',              group:'DeepSeek' },
+    { x:76.8, y:40.4, label:'DeepSeek-Coder-V2',        group:'DeepSeek' },
+    { x:75.1, y:42.0, label:'DeepSeek-V2.5',            group:'DeepSeek' },
+
+    { x:86.0, y:35.0, label:'Qwen3-A3B',                group:'Qwen' },
+    { x:90.0, y:25.7, label:'Qwen3-Next',               group:'Qwen' },
+
+    { x:80.5, y: 9.1, label:'GPT-OSS-20B',              group:'GPT-OSS' },
+  ];
+
+
+  const COLORS = {
+    'DeepSeek-Light': { point:'rgba(74,111,220,0.90)',   halo:'rgba(74,111,220,0.18)' },
+    'DeepSeek':       { point:'rgba(74,111,220,0.90)',   halo:'rgba(74,111,220,0.18)' },
+    'Qwen':           { point:'rgba(137,110,255,0.90)',  halo:'rgba(137,110,255,0.18)' },
+    'GPT-OSS':        { point:'rgba(16,163,127,0.90)',   halo:'rgba(16,163,127,0.22)' },
+  };
+
+  const FIXED_ELLIPSES = {
+    'DeepSeek-Light': { cx: 53.2, cy: 27.1, rx: 14.0, ry:  8.0, deg: -14, color: COLORS['DeepSeek-Light'].halo },
+    'DeepSeek':       { cx: 73.1, cy: 42.0, rx: 12.5, ry:  6.5, deg: -10, color: COLORS['DeepSeek'].halo },
+    'Qwen':           { cx: 88.0, cy: 30.5, rx:  6.5, ry: 12.0, deg:  20, color: COLORS['Qwen'].halo },
+    'GPT-OSS':        { cx: 80.5, cy:  9.1, rx:  5.0, ry:  3.5, deg:   0, color: COLORS['GPT-OSS'].halo },
+  };
+
+  const groupVisible = { 'DeepSeek-Light':true, 'DeepSeek':true, 'Qwen':true, 'GPT-OSS':true };
+  const groupNames   = Object.keys(groupVisible);
+
+
+  const datasets = groupNames.map(g => ({
+    label: g,
+    type: 'scatter',
+    parsing: false,
+    data: rows.filter(r => r.group === g).map(r => ({x:r.x, y:r.y, label:r.label})),
+
+
+    pointStyle: ctx => {
+      const img = ICON_IMG[ctx.dataset.label];
+      return (img && img.complete) ? img : 'circle';
+    },
+
+
+    pointRadius: groupVisible[g] ? 20 : 0,
+    pointHoverRadius: groupVisible[g] ? 24 : 0,
+    hitRadius: 14,
+    pointBorderWidth: 0
+  }));
+
+
+  const ellipsePolygonPlugin = {
+    id: 'ellipsePolygonPlugin',
+    beforeDatasetsDraw(chart){
+      const {ctx, scales:{x, y}} = chart;
+      ctx.save();
+      const N = 120; // 
+      for (const g of groupNames){
+        if (!groupVisible[g]) continue;
+        const e = FIXED_ELLIPSES[g];
+        const theta = e.deg * Math.PI/180;
+        const cosT = Math.cos(theta), sinT = Math.sin(theta);
+
+        ctx.beginPath();
+        for (let k=0; k<=N; k++){
+          const t  = (k / N) * Math.PI * 2;
+          const ex = e.cx + e.rx * Math.cos(t) * cosT - e.ry * Math.sin(t) * sinT;
+          const ey = e.cy + e.rx * Math.cos(t) * sinT + e.ry * Math.sin(t) * cosT;
+          const px = x.getPixelForValue(ex);
+          const py = y.getPixelForValue(ey);
+          if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fillStyle = e.color;
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  };
+
+
+  const pointLabels = {
+    id: 'pointLabels',
+    afterDatasetsDraw(chart){
+      const {ctx} = chart; ctx.save();
+      ctx.font = '600 12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      ctx.fillStyle = '#222';
+      chart.data.datasets.forEach((ds, di)=>{
+        if (!groupVisible[ds.label]) return;
+        const meta = chart.getDatasetMeta(di);
+        meta.data.forEach((elem, i)=>{
+          const {x, y} = elem.tooltipPosition();
+          const label = ds.data[i].label;
+          if (label) ctx.fillText(label, x + 8, y - 6);
+        });
+      });
+      ctx.restore();
+    }
+  };
+
+
+  chart = new Chart(el.getContext('2d'), {
+    type: 'scatter',
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      transitions: { active: { animation: { duration: 0 } } },
+      scales: {
+        x: { title:{display:true, text:'Avg. Performance', font:{weight:'700'}},
+             min: 40, max: 95, grid:{color:'rgba(0,0,0,0.06)'} },
+        y: { title:{display:true, text:'MUI', font:{weight:'700'}},
+             min: 0,  max: 50, grid:{color:'rgba(0,0,0,0.06)'} }
+      },
+      plugins: {
+        legend: { display:false },
+        tooltip: {
+          callbacks: {
+            title: (items)=> items[0].raw.label,
+            label: (ctx)=> `(${ctx.parsed.x}, ${ctx.parsed.y}) • ${ctx.dataset.label}`
+          },
+          filter: (ctx)=> groupVisible[ctx.dataset.label]
+        }
+      },
+      onHover: (e, els)=>{ e.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+      onClick: (evt, els)=>{
+        const ds = chart.data.datasets;
+        if(!els.length){
+          ds.forEach(d=>{
+            d.pointRadius      = groupVisible[d.label] ? 14 : 0;
+            d.pointHoverRadius = groupVisible[d.label] ? 16 : 0;
+          });
+        } else {
+          const {datasetIndex} = els[0];
+          ds.forEach((d,i)=>{
+            const active = (i===datasetIndex) && groupVisible[d.label];
+            d.pointRadius      = groupVisible[d.label] ? (active? 16 : 14) : 0;
+            d.pointHoverRadius = groupVisible[d.label] ? 18 : 0;
+          });
+        }
+        chart.update('none');
+      }
+    },
+    plugins: [ellipsePolygonPlugin, pointLabels]
+  });
+
+
+  function applyGroupVisibility(){
+    chart.data.datasets.forEach(ds=>{
+      ds.pointRadius      = groupVisible[ds.label] ? 14 : 0;
+      ds.pointHoverRadius = groupVisible[ds.label] ? 16 : 0;
+    });
+    chart.update('none');
+  }
+
+  document.querySelectorAll('.legend-chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const g = btn.getAttribute('data-group');
+      groupVisible[g] = !groupVisible[g];
+      btn.classList.toggle('on', groupVisible[g]);
+      applyGroupVisibility();
+    });
+  });
+
+})();
+</script>
+
+
+<script>
+(function(){
+  if (typeof Chart === 'undefined') return;
+
+  let chart1, chart2;
+  function loadImg(src){
+    const img = new Image();
+    img.onload = () => { chart1 && chart1.update('none'); chart2 && chart2.update('none'); };
+    img.src = src;
+    return img;
+  }
+
+  const olmoeIcon = loadImg('{{ "/assets/icons/olmoe.svg" | relative_url }}');
+
+
+  const overall = [
+    {x:15.4, y:36.5, label:'OLMoE-0.5T'},
+    {x:17.4, y:39.2, label:'OLMoE-1T'},
+    {x:22.1, y:40.2, label:'OLMoE-2T'},
+    {x:24.5, y:40.0, label:'OLMoE-3T'},
+    {x:25.5, y:39.8, label:'OLMoE-4T'},
+    {x:26.7, y:38.5, label:'OLMoE-5T'},
+  ];
+  const gsm8k = [
+    {x:10.4, y:2.4, label:'OLMoE-0.5T'},
+    {x:10.8, y:2.6, label:'OLMoE-1T'},
+    {x:12.8, y:2.9, label:'OLMoE-2T'},
+    {x:16.4, y:3.0, label:'OLMoE-3T'},
+    {x:20.8, y:3.0, label:'OLMoE-4T'},
+    {x:23.8, y:3.2, label:'OLMoE-5T'},
+  ];
+
+
+  function phaseBands(accColor, evoColor, splitAtX, bothPhases){
+    return {
+      id:'phaseBands_'+splitAtX,
+      beforeDatasetsDraw(chart){
+        const {ctx, chartArea, scales:{x}} = chart;
+        ctx.save();
+        // acc
+        const x0 = chartArea.left;
+        const xSplit = x.getPixelForValue(splitAtX ?? x.max);
+        ctx.fillStyle = accColor;
+        ctx.fillRect(x0, chartArea.top, xSplit - x0, chartArea.bottom - chartArea.top);
+        // evo
+        if (bothPhases){
+          ctx.fillStyle = evoColor;
+          ctx.fillRect(xSplit, chartArea.top, chartArea.right - xSplit, chartArea.bottom - chartArea.top);
+        }
+        ctx.restore();
+      }
+    };
+  }
+
+  // 点标签插件
+const pointLabels = {
+  id: 'pointLabels',
+  afterDatasetsDraw(chart){
+    const {ctx} = chart; ctx.save();
+
+    ctx.font = '700 13px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
+
+    ctx.fillStyle = '#000000'; // 
+
+    chart.data.datasets.forEach((ds, di)=>{
+      const meta = chart.getDatasetMeta(di);
+      meta.data.forEach((elem, i)=>{
+        const {x, y} = elem.tooltipPosition();
+        const label = ds.data[i].label;
+        if (!label) return;
+
+        let offsetX = 10;
+        let offsetY = 20;
+        if (label === 'OLMoE-4T') {
+          offsetX = 10;
+          offsetY = 10;
+        }
+        if (label === 'OLMoE-5T') {
+          offsetX = 25;
+          offsetY = 15;
+        }
+        ctx.fillText(label, x - offsetX  , y - offsetY); // 偏移到右上角
+      });
+    });
+    ctx.restore();
+  }
+};
+function makeChart(canvasId, dataPoints, xMinMax, yMinMax, splitX, showEvo, labels){
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  const opts = labels || {};  // {title:'',xLabel:'',yLabel:''}
+
+  return new Chart(ctx, {
+    type:'line',
+    data:{
+      datasets:[{
+        label:'Trajectory',
+        data:dataPoints,
+        parsing:false,
+        showLine:true,
+        borderColor:'#CCCCCC',
+        borderWidth:2,
+        fill:false,
+        tension:0.25,
+        pointRadius:8,
+        pointHoverRadius:10,
+        pointStyle: c => (olmoeIcon && olmoeIcon.complete) ? olmoeIcon : 'circle'
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:false,
+      plugins:{
+        legend:{display:false},
+        title:{
+          display: !!opts.title,         // 
+          text: opts.title,
+          font:{weight:'700', size:16},
+          padding:{top:8,bottom:8}
+        },
+        tooltip:{
+          intersect:false,
+          callbacks:{
+            title:items=>items[0].raw.label,
+            label:ctx=>`Perf ${ctx.parsed.x}, MUI ${ctx.parsed.y}`
+          }
+        }
+      },
+      scales:{
+        x:{
+          type:'linear',
+          min:xMinMax[0],max:xMinMax[1],
+          title:{display:true,text:opts.xLabel || 'Performance',font:{weight:'700'}},
+          grid:{color:'rgba(0,0,0,0.06)'}
+        },
+        y:{
+          min:yMinMax[0],max:yMinMax[1],
+          title:{display:true,text:opts.yLabel || 'MUI',font:{weight:'700'}},
+          grid:{color:'rgba(0,0,0,0.06)'}
+        }
+      }
+    },
+    plugins:[phaseBands('rgba(59,130,246,0.15)', 'rgba(16,163,127,0.20)', splitX, showEvo), pointLabels]
+  });
+}
+
+  // chart1 = makeChart('olmoeOverall', overall, [14,28], [35,46], 22.1, true);
+  // chart2 = makeChart('olmoeGSM8K', gsm8k, [10,25], [2.2,3.4], 25, false);
+  chart1 = makeChart(
+  'olmoeOverall', 
+  overall, 
+  [14,28], [35,46], 
+  22.1, 
+  true,
+  { 
+    title: 'OLMoE Avg.Performance vs MUI', 
+    xLabel: 'Avg. Performance', 
+    yLabel: 'MUI (Overall)' 
+  }
+);
+
+  chart2 = makeChart(
+    'olmoeGSM8K', 
+    gsm8k, 
+    [10,25], [2.2,3.4], 
+    25, 
+    false,
+    { 
+      title: 'OLMoE MBPP Performance vs MUI', 
+      xLabel: 'Performance (MBPP)', 
+      yLabel: 'MUI (MBPP)' 
+    }
+  );
+
+})();
+</script>
+
+
+<script>
+(function(){
+  if (typeof Chart === 'undefined') return;
+
+
+  const labels = [
+    'DeepSeek-MoE',
+    'Qwen1.5-MoE',
+    'DeepSeek-V2-Light',
+    'DeepSeek-Coder-LV2',
+    'Qwen3-Coder-A3B',
+    'Qwen3-A3B',
+    'GPT-OSS-20B'
+  ];
+
+  const valuesRaw = [7.8, 8.85, 11.36, 11.65, 8.12, 9.8, 26.7];
+
+
+  const values = valuesRaw.map(v => Number(v));
+
+
+  const icons = {};
+  function loadImg(src){
+    const img = new Image();
+    img.src = src;
+    return img;
+  }
+  icons.DeepSeek = loadImg('{{ "/assets/icons/deepseek.svg" | relative_url }}');
+  icons.Qwen     = loadImg('{{ "/assets/icons/qwen.svg"     | relative_url }}');
+  icons['GPT-OSS']=loadImg('{{ "/assets/icons/openai.svg"   | relative_url }}');
+
+  function groupOf(label){
+    if (label.startsWith('DeepSeek')) return 'DeepSeek';
+    if (label.startsWith('Qwen'))     return 'Qwen';
+    if (label.startsWith('GPT-OSS'))  return 'GPT-OSS';
+    return 'DeepSeek';
+  }
+
+  // ------- 颜色/渐变 -------
+  const COLORS = {
+    DeepSeek:  '#4a6fde',    // 
+    Qwen:      '#896eff',    //
+    'GPT-OSS': '#10a37f'     // 
+  };
+  const ctx2d = document.getElementById('keyExpertBar').getContext('2d');
+  function barGradient(hex){
+    const g = ctx2d.createLinearGradient(0, 0, 0, ctx2d.canvas.height);
+    g.addColorStop(0, hex + 'ee'); 
+    g.addColorStop(1, hex + '66'); 
+    return g;
+  }
+
+
+  const iconsAndLabels = {
+    id: 'iconsAndLabels',
+    afterDatasetsDraw(chart){
+      const {ctx} = chart;
+      ctx.save();
+      ctx.font = '600 11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      ctx.fillStyle = '#222';
+      ctx.textAlign = 'center';
+      chart.data.datasets.forEach((ds, di) => {
+        const meta = chart.getDatasetMeta(di);
+        meta.data.forEach((bar, i) => {
+          const x = bar.x;
+          const y = bar.y;
+
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(ds.data[i].toFixed(2), x, y - 8);
+
+          const group = groupOf(labels[i]);
+          const img = icons[group];
+          if (img && img.complete){
+            const size = 22;
+            ctx.drawImage(img, x - size/2, y - 20 - size - 4, size, size);
+          }
+        });
+      });
+      ctx.restore();
+    }
+  };
+
+
+  const barChart = new Chart(ctx2d, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Key Expert Proportion (Math)',
+        data: values,
+        borderWidth: 0,
+        borderRadius: 10,
+        backgroundColor: (c) => {
+          const group = groupOf(labels[c.dataIndex]);
+          return barGradient(COLORS[group]);
+        },
+        hoverBackgroundColor: (c) => {
+          const group = groupOf(labels[c.dataIndex]);
+          return COLORS[group];
+        }
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 250 },
+      scales: {
+        x: {
+          ticks: { maxRotation: 32, minRotation: 32, autoSkip: false },
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          suggestedMax: Math.max(...values) + 5, 
+          grid: { color: 'rgba(0,0,0,0.08)', borderDash: [4,4] },
+          title: { display: true, text: 'MATH Expert Proportion', font:{weight:'700'} }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => items[0].label,
+            label: (ctx) => `Proportion: ${ctx.parsed.y.toFixed(2)}`
+          }
+        }
+      }
+    },
+    plugins: [iconsAndLabels]
+  });
+
+})();
+</script>
+
+
+<script>
+(function(){
+  if (typeof Chart === 'undefined') return;
+
+
+  const qwenData = [
+    { label:'L28-S1', prop:1.000, mui:0.99 },
+    { label:'L10-S1', prop:1.000, mui:0.99 },
+    { label:'L18-S1', prop:1.000, mui:0.98 },
+    { label:'L31-S1', prop:1.000, mui:0.98 },
+    { label:'L7-S1',  prop:1.000, mui:0.96 },
+    { label:'L29-S1', prop:1.000, mui:0.93 },
+    { label:'L32-S1', prop:1.000, mui:0.91 },
+    { label:'L24-S1', prop:1.000, mui:0.90 },
+    { label:'L8-S1',  prop:1.000, mui:0.90 },
+    { label:'L4-S1',  prop:1.000, mui:0.90 },
+  ];
+
+  const gptData = [
+    { label:'L17-E8',  prop:1.000, mui:0.06 },
+    { label:'L7-E4',   prop:1.000, mui:0.08 },
+    { label:'L20-E11', prop:1.000, mui:0.14 },
+    { label:'L15-E3',  prop:0.999, mui:0.05 },
+    { label:'L11-E7',  prop:0.998, mui:0.08 },
+    { label:'L2-E1',   prop:0.998, mui:0.09 },
+    { label:'L16-E5',  prop:0.996, mui:0.06 },
+    { label:'L7-E7',   prop:0.995, mui:0.11 },
+    { label:'L0-E24',  prop:0.995, mui:0.02 },
+    { label:'L6-E10',  prop:0.995, mui:0.02 },
+  ];
+
+
+  function toStacked(data){
+    const labels = data.map(d => d.label);
+    const mui    = data.map(d => Math.max(0, Math.min(d.mui, d.prop)));      
+    const rest   = data.map((d,i) => Math.max(0, (d.prop - mui[i])));          
+    const propTxt= data.map(d => (d.prop).toFixed(3));                   
+    return { labels, mui, rest, propTxt };
+  }
+
+  const gray   = 'rgba(0,0,0,0.12)';             
+  const yellow = 'rgba(250, 204, 21, 0.85)';      
+  const navy   = 'rgba(25, 35, 64, 0.85)';        
+  const titleFont = { weight:'700', size:14 };
+
+const barLabelsPlugin = {
+  id: 'barLabelsPlugin',
+  afterDatasetsDraw(chart, args, opts){
+    const {ctx} = chart;
+    const dsMui = chart.data.datasets[0]; 
+    const metaMui = chart.getDatasetMeta(0);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+
+    const isGPT = chart.canvas.id === 'topExpertsGPT';
+
+    chart.data.labels.forEach((lbl, i)=>{
+      const elm = metaMui.data[i]; if (!elm) return;
+      const x = elm.x;
+      const yTopMui = elm.y;
+      const yBotMui = elm.y + elm.height;
+      const muiVal = dsMui.data[i];
+
+      ctx.font = '600 11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      ctx.fillStyle = isGPT ? '#fff' : '#222';   
+      const centerY = yTopMui + (yBotMui - yTopMui)/2;
+      const pct = Math.round(muiVal*100) + '%';
+      if (muiVal > 0.04) {
+        ctx.fillText(pct, x, centerY);
+      }
+
+      const propTxt = (opts.propTexts && opts.propTexts[i]) || '';
+      if (propTxt){
+        ctx.font = '600 10px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
+        ctx.fillStyle = '#666';
+        ctx.textBaseline = 'bottom';
+        const yTopBar = chart.getDatasetMeta(0).data[i].base;
+        ctx.fillText(propTxt, x, yTopBar - 2);
+      }
+    });
+
+    ctx.restore();
+  }
+};
+
+  function makeTop10(canvasId, data, title, colorMui){
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const S = toStacked(data);
+
+    return new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: S.labels,
+        datasets: [
+          { 
+            label: 'Expert MUI',
+            data: S.mui,
+            backgroundColor: colorMui,
+            borderWidth: 0,
+            borderRadius: 6,
+            stack: 'S'
+          },
+          { 
+            label: 'Remainder',
+            data: S.rest,
+            backgroundColor: gray,
+            borderWidth: 0,
+            borderRadius: 6,
+            stack: 'S'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        scales: {
+          x: {
+            stacked: true,
+            ticks: { maxRotation: 35, minRotation: 35 },
+            grid: { display: false }
+          },
+          y: {
+            stacked: true,
+            min: 0,
+            max: 1,
+            ticks: {
+              callback: v => `${Math.round(v*100)}%`
+            },
+            grid: { color:'rgba(0,0,0,0.08)', borderDash:[4,4] }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: title, font: titleFont, padding:{bottom:6} },
+          tooltip: {
+            callbacks: {
+              title: items => items[0].label,
+              label: (ctx) => {
+                const idx = ctx.dataIndex;
+                const prop = (S.mui[idx] + S.rest[idx]);
+                const mui  = S.mui[idx];
+                return [
+                  `prop: ${(prop).toFixed(3)}`,
+                  `MUI:  ${(mui*100).toFixed(1)}%`
+                ];
+              }
+            }
+          }
+        }
+      },
+      plugins: [{
+        ...barLabelsPlugin,
+        propTexts: S.propTxt 
+      }]
+    });
+  }
+  
+  // ---------- 创建两张图 ----------
+  makeTop10('topExpertsQwen', qwenData, 'Qwen3-Next', yellow);
+  makeTop10('topExpertsGPT',  gptData,  'GPT-OSS-20B', navy);
+
+})();
+</script>
+
+
+</body>
+</html>

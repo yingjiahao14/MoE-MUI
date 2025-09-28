@@ -1,0 +1,21 @@
+title: "Understanding MoE Models through Internal Mechanisms"
+description: "A clean, single-page site introducing our paper on understanding Mixture-of-Experts (MoE) through an internal metric (MUI)."
+url: ""  # set your GitHub Pages URL if you have a custom domain
+baseurl: ""  # set to repo name if using project pages, e.g., /username.github.io
+lang: en
+permalink: pretty
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-remote-theme
+
+# We use a very thin base; layout and CSS provide the look & feel.
+# You can switch to a GitHub Pages theme if you prefer:
+# remote_theme: pages-themes/minimal@v0.2.0
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+
+
