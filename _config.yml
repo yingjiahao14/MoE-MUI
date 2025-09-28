@@ -1,6 +1,6 @@
 title: "Understanding MoE Models through Internal Mechanisms"
-description: "A clean, single-page site introducing our paper on understanding Mixture-of-Experts (MoE) through an internal metric (MUI)."
-url: ""  # set your GitHub Pages URL if you have a custom domain
+url: "https://yingjiahao14.github.io"
+baseurl: "/MoE-MUI"  # set your GitHub Pages URL if you have a custom domain
 baseurl: ""  # set to repo name if using project pages, e.g., /username.github.io
 lang: en
 permalink: pretty
