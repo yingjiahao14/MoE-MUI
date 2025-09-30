@@ -17,7 +17,7 @@ title: MoE Mechanisms via MUI
         <span class="badge">Expert Specialization</span>
       </div>
       <div class="cta">
-        <a class="button" href="" title="Paper PDF (replace link)">📄 Paper (PDF)</a>
+        <a class="button" href="https://arxiv.org/abs/2509.23933" title="Paper PDF (replace link)">📄 Paper (PDF)</a>
         <a class="button secondary" href="https://github.com/" title="Code (replace link)">💻 Code (coming soon)</a>
       </div>
       <p class="meta" style="margin-top:10px;">
@@ -220,7 +220,7 @@ it is difficult in practice to interpret them as independent task-specific units
     <div class="cards">
       <div class="card">
         <h3>Paper</h3>
-        <p><a href="#" title="Replace with your arXiv/URL">📄 arXiv / PDF link</a></p>
+        <p><a href="https://arxiv.org/abs/2509.23933" title="Replace with your arXiv/URL">📄 arXiv / PDF link</a></p>
       </div>
       <div class="card">
         <h3>Code</h3>
@@ -228,11 +228,14 @@ it is difficult in practice to interpret them as independent task-specific units
       </div>
       <div class="card">
         <h3>BibTeX</h3>
-        <pre><code>@inproceedings{{mui-moe,
-  title={{Understanding MoE Mechanisms via an Internal Metric (MUI)}},
-  author={{Your Name and Coauthors}},
-  year={{2025}},
-  url={{https://example.com/paper}}}
+        <pre><code>@misc{ying2025benchmarksunderstandingmixtureofexpertsmodels,
+      title={Beyond Benchmarks: Understanding Mixture-of-Experts Models through Internal Mechanisms}, 
+      author={Jiahao Ying and Mingbao Lin and Qianru Sun and Yixin Cao},
+      year={2025},
+      eprint={2509.23933},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2509.23933}, 
 }</code></pre>
       </div>
       <div class="card">

@@ -328,3 +328,10 @@ body{
 @media (max-width: 900px){
   .chart-row.two{ grid-template-columns: 1fr; }
 }
+
+pre code {
+  white-space: pre-wrap;       
+  word-wrap: break-word;       
+  overflow-x: auto;           
+  display: block;
+}

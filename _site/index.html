@@ -8,19 +8,19 @@
 <meta name="generator" content="Jekyll v4.4.1" />
 <meta property="og:title" content="MoE Mechanisms via MUI" />
 <meta property="og:locale" content="en" />
-<link rel="canonical" href="http://localhost:4000/" />
-<meta property="og:url" content="http://localhost:4000/" />
+<link rel="canonical" href="http://localhost:4000/MoE-MUI/" />
+<meta property="og:url" content="http://localhost:4000/MoE-MUI/" />
 <meta property="og:site_name" content="Understanding MoE Models through Internal Mechanisms" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="MoE Mechanisms via MUI" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","headline":"MoE Mechanisms via MUI","name":"Understanding MoE Models through Internal Mechanisms","url":"http://localhost:4000/"}</script>
+{"@context":"https://schema.org","@type":"WebSite","headline":"MoE Mechanisms via MUI","name":"Understanding MoE Models through Internal Mechanisms","url":"http://localhost:4000/MoE-MUI/"}</script>
 <!-- End Jekyll SEO tag -->
-<link rel="icon" href="/assets/favicon.svg" />
+<link rel="icon" href="/MoE-MUI/assets/favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <link rel="stylesheet" href="/assets/css/style.css"/>
+  <link rel="stylesheet" href="/MoE-MUI/assets/css/style.css"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3"></script>
   <script>
@@ -33,6 +33,14 @@
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LM9VLFBFL4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LM9VLFBFL4');
+</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -70,7 +78,7 @@
         <span class="badge">Expert Specialization</span>
       </div>
       <div class="cta">
-        <a class="button" href="" title="Paper PDF (replace link)">📄 Paper (PDF)</a>
+        <a class="button" href="https://arxiv.org/abs/2509.23933" title="Paper PDF (replace link)">📄 Paper (PDF)</a>
         <a class="button secondary" href="https://github.com/" title="Code (replace link)">💻 Code (coming soon)</a>
       </div>
       <p class="meta" style="margin-top:10px;">
@@ -153,7 +161,7 @@
         </div>
       </div>
       </div>
-    <!-- <img src="/assets/figures/main2.png" class="zoomable figure" alt="MoE illustration"> -->
+    <!-- <img src="/MoE-MUI/assets/figures/main2.png" class="zoomable figure" alt="MoE illustration"> -->
     <!-- <canvas id="muiBar" height="200" aria-label="Key experts ratio by model" role="img"></canvas> -->
     <!-- <div class="cards">
       <div class="card">
@@ -272,7 +280,7 @@ it is difficult in practice to interpret them as independent task-specific units
     <div class="cards">
       <div class="card">
         <h3>Paper</h3>
-        <p><a href="#" title="Replace with your arXiv/URL">📄 arXiv / PDF link</a></p>
+        <p><a href="https://arxiv.org/abs/2509.23933" title="Replace with your arXiv/URL">📄 arXiv / PDF link</a></p>
       </div>
       <div class="card">
         <h3>Code</h3>
@@ -280,10 +288,14 @@ it is difficult in practice to interpret them as independent task-specific units
       </div>
       <div class="card">
         <h3>BibTeX</h3>
-        <pre><code>@inproceedings,
-  author=,
-  year=2025,
-  url=}
+        <pre><code>@misc{ying2025benchmarksunderstandingmixtureofexpertsmodels,
+      title={Beyond Benchmarks: Understanding Mixture-of-Experts Models through Internal Mechanisms}, 
+      author={Jiahao Ying and Mingbao Lin and Qianru Sun and Yixin Cao},
+      year={2025},
+      eprint={2509.23933},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2509.23933}, 
 }</code></pre>
       </div>
       <div class="card">
@@ -364,10 +376,10 @@ it is difficult in practice to interpret them as independent task-specific units
 
 
   const ICON_IMG = {
-    'DeepSeek-Light': loadImg('/assets/icons/deepseek.svg'),
-    'DeepSeek':       loadImg('/assets/icons/deepseek.svg'),
-    'Qwen':           loadImg('/assets/icons/qwen.svg'),
-    'GPT-OSS':        loadImg('/assets/icons/openai.svg'),
+    'DeepSeek-Light': loadImg('/MoE-MUI/assets/icons/deepseek.svg'),
+    'DeepSeek':       loadImg('/MoE-MUI/assets/icons/deepseek.svg'),
+    'Qwen':           loadImg('/MoE-MUI/assets/icons/qwen.svg'),
+    'GPT-OSS':        loadImg('/MoE-MUI/assets/icons/openai.svg'),
   };
 
  
@@ -554,7 +566,7 @@ it is difficult in practice to interpret them as independent task-specific units
     return img;
   }
 
-  const olmoeIcon = loadImg('/assets/icons/olmoe.svg');
+  const olmoeIcon = loadImg('/MoE-MUI/assets/icons/olmoe.svg');
 
 
   const overall = [
@@ -747,9 +759,9 @@ function makeChart(canvasId, dataPoints, xMinMax, yMinMax, splitX, showEvo, labe
     img.src = src;
     return img;
   }
-  icons.DeepSeek = loadImg('/assets/icons/deepseek.svg');
-  icons.Qwen     = loadImg('/assets/icons/qwen.svg');
-  icons['GPT-OSS']=loadImg('/assets/icons/openai.svg');
+  icons.DeepSeek = loadImg('/MoE-MUI/assets/icons/deepseek.svg');
+  icons.Qwen     = loadImg('/MoE-MUI/assets/icons/qwen.svg');
+  icons['GPT-OSS']=loadImg('/MoE-MUI/assets/icons/openai.svg');
 
   function groupOf(label){
     if (label.startsWith('DeepSeek')) return 'DeepSeek';
